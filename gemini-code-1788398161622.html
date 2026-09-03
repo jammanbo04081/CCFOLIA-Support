@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코코포리아 다이스 매크로 변환기</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        h2 { color: #2c3e50; }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 14px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background-color: #2980b9; }
+        .output-box {
+            background: #eec;
+            background: #f8f9fa;
+            border: 1px dashed #bbb;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            margin-top: 10px;
+            min-height: 50px;
+        }
+        .guide {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>🎲 코코포리아 다이스 매크로 변환기</h2>
+
+    <!-- 기능 1: 일반 변환 -->
+    <div class="card">
+        <h3>1. 일반 특성치/기능치 변환 (예: 근력 50)</h3>
+        <div class="guide">줄바꿈이나 띄어쓰기로 구분된 이름과 숫자를 입력하세요. (예: 근력50 / DEX 65)</div>
+        <textarea id="inputNormal" placeholder="근력 50&#10;DEX 65&#10;아이디어 70"></textarea>
+        <button onclick="convertNormal()">매크로 변환하기</button>
+        <div class="output-box" id="outputNormal">변환 결과가 여기에 표시됩니다.</div>
+        <button onclick="copyToClipboard('outputNormal')" style="background-color: #2ecc71;">결과 복사</button>
+    </div>
+
+    <!-- 기능 2: 6판 -> 7판 자동 변환 -->
+    <div class="card">
+        <h3>2. CoC 6판 ➔ 7판 자동 변환 및 매크로 (예: 근력 14)</h3>
+        <div class="guide">6판 스탯 값을 입력하면 자동으로 x5 계산 후 7판 매크로로 변환합니다.</div>
+        <textarea id="input6th" placeholder="근력 14&#10;민첩 12&#10;지능 16"></textarea>
+        <button onclick="convert6to7()">7판 변환 및 매크로 생성</button>
+        <div class="output-box" id="output6to7">변환 결과가 여기에 표시됩니다.</div>
+        <button onclick="copyToClipboard('output6to7')" style="background-color: #2ecc71;">결과 복사</button>
+    </div>
+
+    <script>
+        // 정규식을 이용해 글자와 숫자를 찾아내는 함수
+        function parseInput(text) {
+            const lines = text.trim().split('\n');
+            let results = [];
+            
+            // 이름과 숫자를 매칭하는 정규식 (예: "근력 50", "DEX:65", "아이디어50")
+            const regex = /([가-힣a-zA-Z\s]+)[\s:]*([0-9]+)/;
+
+            lines.forEach(line => {
+                const match = line.trim().match(regex);
+                if (match) {
+                    let name = match[1].trim();
+                    let value = parseInt(match[2]);
+                    results.push({ name, value });
+                }
+            });
+            return results;
+        }
+
+        function convertNormal() {
+            const input = document.getElementById('inputNormal').value;
+            const data = parseInput(input);
+            let output = data.map(item => `CC<=${item.value} ${item.name}`).join('\n');
+            document.getElementById('outputNormal').innerText = output;
+        }
+
+        function convert6to7() {
+            const input = document.getElementById('input6th').value;
+            const data = parseInput(input);
+            let output = data.map(item => {
+                let convertedValue = item.value * 5;
+                return `CC<=${convertedValue} ${item.name}`;
+            }).join('\n');
+            document.getElementById('output6to7').innerText = output;
+        }
+
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('클립보드에 복사되었습니다!');
+            });
+        }
+    </script>
+
+</body>
+</html>
