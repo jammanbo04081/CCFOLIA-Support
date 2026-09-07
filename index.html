@@ -6,19 +6,19 @@
   <title>CoC 코코포리아 매크로 변환기</title>
   <style>
     * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a1a; color: #e0e0e0; margin: 0; padding: 20px; }
-    .container { max-width: 700px; margin: 0 auto; background: #252526; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-    h2 { margin-top: 0; color: #4ec9b0; text-align: center; }
-    label { font-weight: bold; margin-bottom: 8px; display: block; color: #9cdcfe; }
-    textarea { width: 100%; height: 180px; background: #1e1e1e; color: #dcdcdc; border: 1px solid #3c3c3c; border-radius: 6px; padding: 12px; font-family: monospace; resize: vertical; margin-bottom: 15px; }
-    textarea:focus { outline: none; border-color: #007acc; }
-    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #2d2d2d; padding: 12px 16px; border-radius: 6px; }
-    .options label { font-weight: normal; color: #ce9178; margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-    button { width: 100%; padding: 12px; background: #0e639c; color: white; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s; margin-bottom: 15px; }
-    button:hover { background: #1177bb; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; }
+    .container { max-width: 700px; margin: 0 auto; background: #1e1e1e; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 1px solid #2a2a2a; }
+    h2 { margin-top: 0; color: #ffffff; text-align: center; font-weight: 600; letter-spacing: -0.5px; }
+    label { font-weight: bold; margin-bottom: 8px; display: block; color: #cccccc; }
+    textarea { width: 100%; height: 180px; background: #141414; color: #e0e0e0; border: 1px solid #333333; border-radius: 6px; padding: 12px; font-family: monospace; resize: vertical; margin-bottom: 15px; }
+    textarea:focus { outline: none; border-color: #555555; }
+    .options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; background: #252525; padding: 14px 16px; border-radius: 6px; border: 1px solid #333333; }
+    .options label { font-weight: normal; color: #b0b0b0; margin: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+    button { width: 100%; padding: 12px; background: #000000; color: #ffffff; border: 1px solid #333333; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.2s, border-color 0.2s; margin-bottom: 15px; }
+    button:hover { background: #1a1a1a; border-color: #555555; }
     .output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .copy-btn { width: auto; padding: 6px 12px; margin: 0; font-size: 13px; background: #3a3d41; }
-    .copy-btn:hover { background: #4e5257; }
+    .copy-btn { width: auto; padding: 6px 14px; margin: 0; font-size: 13px; background: #000000; color: #ffffff; border: 1px solid #333333; border-radius: 4px; }
+    .copy-btn:hover { background: #1a1a1a; border-color: #555555; }
   </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
   <h2>CoC 코코포리아 매크로 변환기</h2>
 
   <label for="input">입력 (텍스트 복사-붙여넣기):</label>
-  <textarea id="input" placeholder="예시:&#10;STR15 DEX14 APP16 POW12&#10;근력50 DEX 65 관찰력 70%"></textarea>
+  <textarea id="input" placeholder="예시:&#10;STR15 DEX14 APP16 HP10 MP12&#10;근력50 DEX 65 HP 10 관찰력 70%"></textarea>
 
   <div class="options">
     <label>
@@ -60,10 +60,11 @@
     "SIZ": "크기",
     "INT": "지능",
     "EDU": "교육",
-    "SAN": "이성",
-    "HP": "체력",
-    "MP": "마력"
+    "SAN": "이성"
   };
+
+  // 제외 대상 목록 (HP, MP 및 한글 표현)
+  const excludeList = ["HP", "MP", "체력", "마력"];
 
   // 6판 특성치 자동 판단용 키 목록
   const stats6th = ["근력", "민첩", "민첩성", "건강", "체력", "외모", "지능", "정신", "정신력", "크기", "교육", ...Object.keys(statMap)];
@@ -82,6 +83,11 @@
       let name = match[1].trim();
       let value = parseInt(match[2], 10);
       const upperName = name.toUpperCase();
+
+      // HP, MP 및 체력/마력 항목은 매크로 변환에서 제외
+      if (excludeList.includes(upperName)) {
+        continue;
+      }
 
       // 6판 특성치 5배 변환 로직
       if (is6to7) {
